@@ -1,0 +1,17 @@
+# --- Python/Django ---
+__pycache__/
+*.pyc
+/backend/venv/
+/backend/.env
+db.sqlite3
+/backend/media/
+
+# --- Node.js/React ---
+/frontend/node_modules/
+/frontend/build/
+/frontend/.env
+.pnp
+.pnp.js
+
+# --- General ---
+.DS_Store

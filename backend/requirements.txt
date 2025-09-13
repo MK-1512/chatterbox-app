@@ -1,0 +1,13 @@
+# Use a more recent stable version of Django
+Django>=5.0,<5.1
+# These versions are known to be stable and work well together
+djangorestframework==3.15.1
+djangorestframework-simplejwt==5.3.1
+django-cors-headers==4.3.1
+channels==4.0.0
+channels-redis==4.2.0
+daphne==4.1.0
+mysqlclient==2.2.4
+# Use a newer version of Pillow that supports modern Python
+Pillow>=10.3.0
+python-dotenv==1.0.1
