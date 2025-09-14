@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { ListGroup, Badge } from 'react-bootstrap';
+import { ListGroup, Badge, Spinner } from 'react-bootstrap';
 import axiosInstance from '../../api/axiosConfig';
 import AuthContext from '../../contexts/AuthContext';
 import GlobalSocketContext from '../../contexts/GlobalSocketContext';
@@ -7,6 +7,7 @@ import GlobalSocketContext from '../../contexts/GlobalSocketContext';
 const Sidebar = ({ setActiveChat, activeChatId }) => {
     const [chatList, setChatList] = useState([]);
     const [userList, setUserList] = useState([]);
+    const [usersLoading, setUsersLoading] = useState(true);
     const { user } = useContext(AuthContext);
     const { onlineUsers, unreadCounts } = useContext(GlobalSocketContext);
 
@@ -23,10 +24,13 @@ const Sidebar = ({ setActiveChat, activeChatId }) => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
+                setUsersLoading(true);
                 const usersResponse = await axiosInstance.get('/api/users/');
                 setUserList(usersResponse.data);
             } catch (error) {
                 console.error('Failed to fetch users', error);
+            } finally {
+                setUsersLoading(false);
             }
         };
         if (user) {
@@ -56,9 +60,6 @@ const Sidebar = ({ setActiveChat, activeChatId }) => {
         return room.name;
     };
 
-    // --- ADD FIRST DEBUGGING LOG HERE ---
-    console.log("Current Online Users Set:", onlineUsers);
-
     return (
         <div className="sidebar">
             <h5 className="p-3">Chats</h5>
@@ -82,12 +83,13 @@ const Sidebar = ({ setActiveChat, activeChatId }) => {
             </ListGroup>
             <hr/>
             <h5 className="p-3">Users</h5>
-            <ListGroup variant="flush">
-                {userList.map(u => {
-                    // --- ADD SECOND DEBUGGING LOG HERE ---
-                    console.log(`Checking user: ${u.username}, ID: ${u.id}, Type: ${typeof u.id}. Is online?`, onlineUsers.has(u.id));
-
-                    return (
+            {usersLoading ? (
+                <div className="text-center p-3">
+                    <Spinner animation="border" size="sm" />
+                </div>
+            ) : (
+                <ListGroup variant="flush">
+                    {userList.map(u => (
                         <ListGroup.Item 
                             key={u.id}
                             action
@@ -105,9 +107,9 @@ const Sidebar = ({ setActiveChat, activeChatId }) => {
                             ></span>
                             {u.username}
                         </ListGroup.Item>
-                    );
-                })}
-            </ListGroup>
+                    ))}
+                </ListGroup>
+            )}
         </div>
     );
 };
