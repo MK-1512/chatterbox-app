@@ -11,3 +11,5 @@ mysqlclient==2.2.4
 # Use a newer version of Pillow that supports modern Python
 Pillow>=10.3.0
 python-dotenv==1.0.1
+psycopg2-binary
+dj-database-url
