@@ -4,7 +4,7 @@ import axiosInstance from '../api/axiosConfig';
 
 const useWebSocket = (roomId) => {
     const [messages, setMessages] = useState([]);
-    const [typingUsers, setTypingUsers] = useState([]); // <-- NEW STATE
+    const [typingUsers, setTypingUsers] = useState([]);
     const [isConnecting, setIsConnecting] = useState(true);
     const socketRef = useRef(null);
     const { user, authTokens } = useContext(AuthContext);
@@ -26,8 +26,15 @@ const useWebSocket = (roomId) => {
         };
         fetchMessages();
 
-        const wsScheme = window.location.protocol === "https:" ? "wss" : "ws";
-        const wsURL = `${wsScheme}://${window.location.host.replace('3000', '8000')}/ws/chat/${roomId}/?token=${authTokens.access}`;
+        // --- THIS IS THE UPDATED LOGIC ---
+        // It reads the base URL from the environment variable
+        const apiUrl = process.env.REACT_APP_API_URL;
+        // It determines whether to use ws:// or wss:// (for secure connections)
+        const wsScheme = apiUrl.startsWith("https://") ? "wss" : "ws";
+        // It constructs the full host part of the URL
+        const wsHost = apiUrl.split('//')[1];
+        // It builds the final, correct WebSocket URL
+        const wsURL = `${wsScheme}://${wsHost}/ws/chat/${roomId}/?token=${authTokens.access}`;
         
         socketRef.current = new WebSocket(wsURL);
         socketRef.current.onopen = () => console.log('WebSocket connected');
@@ -39,7 +46,6 @@ const useWebSocket = (roomId) => {
             if (data.type === 'chat_message') {
                 setMessages(prev => [...prev, data.message]);
             } 
-            // --- NEW: HANDLE INCOMING TYPING EVENT ---
             else if (data.type === 'typing') {
                 const typingUser = data.user;
                 if (data.is_typing) {
@@ -68,7 +74,6 @@ const useWebSocket = (roomId) => {
         }
     };
 
-    // --- NEW: FUNCTION TO SEND TYPING NOTIFICATION ---
     const sendTypingNotification = (isTyping) => {
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
             socketRef.current.send(JSON.stringify({
