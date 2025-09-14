@@ -14,13 +14,16 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(() =>
         localStorage.getItem('authTokens') ? jwtDecode(JSON.parse(localStorage.getItem('authTokens')).access) : null
     );
+    // This new state will solve our race condition
     const [loading, setLoading] = useState(true);
 
     const navigate = useNavigate();
+    const API_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+
 
     const loginUser = async (username, password) => {
         try {
-            const response = await axios.post(`${process.env.REACT_APP_API_URL}/api/users/token/`, {
+            const response = await axios.post(`${API_URL}/api/users/token/`, {
                 username,
                 password,
             });
@@ -36,7 +39,7 @@ export const AuthProvider = ({ children }) => {
 
     const registerUser = async (username, password) => {
          try {
-            await axios.post(`${process.env.REACT_APP_API_URL}/api/users/register/`, {
+            await axios.post(`${API_URL}/api/users/register/`, {
                 username,
                 password,
             });
@@ -62,6 +65,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     useEffect(() => {
+        // This effect runs once on startup to finish the loading process
         if (loading) {
             setLoading(false);
         }
@@ -69,6 +73,7 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={contextData}>
+            {/* We will not render the rest of the app until the auth check is complete */}
             {loading ? null : children}
         </AuthContext.Provider>
     );

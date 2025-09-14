@@ -2,11 +2,13 @@ import React, { useState, useEffect, useContext } from 'react';
 import { ListGroup, Badge } from 'react-bootstrap';
 import axiosInstance from '../../api/axiosConfig';
 import AuthContext from '../../contexts/AuthContext';
+import GlobalSocketContext from '../../contexts/GlobalSocketContext';
 
-const Sidebar = ({ setActiveChat, activeChatId, unreadCounts }) => {
+const Sidebar = ({ setActiveChat, activeChatId }) => {
     const [chatList, setChatList] = useState([]);
     const [userList, setUserList] = useState([]);
     const { user } = useContext(AuthContext);
+    const { onlineUsers, unreadCounts } = useContext(GlobalSocketContext);
 
     const fetchUserChats = async () => {
         try {
@@ -54,6 +56,9 @@ const Sidebar = ({ setActiveChat, activeChatId, unreadCounts }) => {
         return room.name;
     };
 
+    // --- ADD FIRST DEBUGGING LOG HERE ---
+    console.log("Current Online Users Set:", onlineUsers);
+
     return (
         <div className="sidebar">
             <h5 className="p-3">Chats</h5>
@@ -78,15 +83,30 @@ const Sidebar = ({ setActiveChat, activeChatId, unreadCounts }) => {
             <hr/>
             <h5 className="p-3">Users</h5>
             <ListGroup variant="flush">
-                {userList.map(u => (
-                    <ListGroup.Item 
-                        key={u.id}
-                        action
-                        onClick={() => handleStartPrivateChat(u.id)}
-                    >
-                        {u.username}
-                    </ListGroup.Item>
-                ))}
+                {userList.map(u => {
+                    // --- ADD SECOND DEBUGGING LOG HERE ---
+                    console.log(`Checking user: ${u.username}, ID: ${u.id}, Type: ${typeof u.id}. Is online?`, onlineUsers.has(u.id));
+
+                    return (
+                        <ListGroup.Item 
+                            key={u.id}
+                            action
+                            onClick={() => handleStartPrivateChat(u.id)}
+                            className="d-flex align-items-center"
+                        >
+                            <span 
+                                className="rounded-circle me-2"
+                                style={{
+                                    width: '10px',
+                                    height: '10px',
+                                    backgroundColor: onlineUsers.has(u.id) ? '#28a745' : '#6c757d',
+                                    transition: 'background-color 0.3s ease',
+                                }}
+                            ></span>
+                            {u.username}
+                        </ListGroup.Item>
+                    );
+                })}
             </ListGroup>
         </div>
     );

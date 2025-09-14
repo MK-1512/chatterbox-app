@@ -120,6 +120,7 @@ SIMPLE_JWT = {
     "USER_ID_CLAIM": "user_id",
     "TOKEN_OBTAIN_SERIALIZER": "users.serializers.MyTokenObtainPairSerializer",
 }
+REDIS_URL = os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379/1')
 
 ASGI_APPLICATION = 'chat_project.asgi.application'
 
