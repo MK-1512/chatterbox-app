@@ -1,40 +1,37 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Form, InputGroup, Button } from 'react-bootstrap';
+import { InputGroup, Button } from 'react-bootstrap';
+import InputEmoji from 'react-input-emoji';
 
 const MessageInput = ({ sendMessage, sendTypingNotification }) => {
     const [message, setMessage] = useState('');
     const typingTimeoutRef = useRef(null);
 
-    // This function now handles typing notifications
-    const handleTyping = (e) => {
-        setMessage(e.target.value);
-        
-        // Send "is typing" signal
+    const handleTyping = (text) => {
+        setMessage(text); // The library gives us the full text
         sendTypingNotification(true);
 
-        // Clear the previous timeout to reset the timer
         if (typingTimeoutRef.current) {
             clearTimeout(typingTimeoutRef.current);
         }
-
-        // Set a new timeout. If the user doesn't type for 2 seconds, send "stopped typing"
         typingTimeoutRef.current = setTimeout(() => {
             sendTypingNotification(false);
-        }, 2000); // 2 seconds
+        }, 2000);
     };
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (message.trim()) {
+    const handleSendMessage = () => {
+        if (message && message.trim()) {
             sendMessage(message);
             setMessage('');
-            // Clear the timeout and send "stopped typing" immediately after sending a message
             if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
             sendTypingNotification(false);
         }
     };
+    
+    // This allows the component to work when the user presses Enter
+    const handleEnter = () => {
+        handleSendMessage();
+    };
 
-    // Cleanup the timer when the component is removed
     useEffect(() => {
         return () => {
             if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
@@ -43,18 +40,17 @@ const MessageInput = ({ sendMessage, sendTypingNotification }) => {
 
     return (
         <div className="message-input-container">
-            <Form onSubmit={handleSubmit}>
-                <InputGroup>
-                    <Form.Control
-                        type="text"
-                        placeholder="Type a message..."
-                        value={message}
-                        onChange={handleTyping}
-                        autoComplete="off"
-                    />
-                    <Button variant="primary" type="submit">Send</Button>
-                </InputGroup>
-            </Form>
+            <InputGroup>
+                {/* The new, self-contained emoji input component */}
+                <InputEmoji
+                    value={message}
+                    onChange={handleTyping}
+                    cleanOnEnter
+                    onEnter={handleEnter}
+                    placeholder="Type a message..."
+                />
+                <Button variant="primary" onClick={handleSendMessage}>Send</Button>
+            </InputGroup>
         </div>
     );
 };

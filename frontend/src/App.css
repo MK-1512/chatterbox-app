@@ -83,3 +83,18 @@ body {
     font-style: italic;
     color: #6c757d;
 }
+
+/* Fix for react-input-emoji library styles */
+.react-emoji-picker--container {
+    width: 100% !important;
+}
+.react-input-emoji--container {
+    width: 100% !important;
+    border-radius: 0 !important;
+    border: none !important;
+}
+.react-input-emoji--input {
+    border-radius: 0 !important;
+    border: 1px solid #ced4da !important;
+    height: 38px !important;
+}
