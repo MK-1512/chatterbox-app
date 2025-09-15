@@ -45,6 +45,9 @@ MIDDLEWARE = [
 
 CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000').split(',')
 CSRF_TRUSTED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000').split(',')
+if RENDER_EXTERNAL_HOSTNAME:
+    # Also trust the backend's own domain
+    CSRF_TRUSTED_ORIGINS.append(f'https://{RENDER_EXTERNAL_HOSTNAME}')
 
 ROOT_URLCONF = 'chat_project.urls'
 AUTH_USER_MODEL = 'users.CustomUser'
