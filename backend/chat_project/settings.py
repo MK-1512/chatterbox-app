@@ -44,9 +44,7 @@ MIDDLEWARE = [
 ]
 
 CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000').split(',')
-CSRF_TRUSTED_ORIGINS = [
-    'https://chatterbox-frontend-mk.onrender.com'
-]
+CSRF_TRUSTED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000').split(',')
 
 ROOT_URLCONF = 'chat_project.urls'
 AUTH_USER_MODEL = 'users.CustomUser'
