@@ -7,35 +7,44 @@ import GlobalSocketContext from '../../contexts/GlobalSocketContext';
 const Sidebar = ({ setActiveChat, activeChatId }) => {
     const [chatList, setChatList] = useState([]);
     const [userList, setUserList] = useState([]);
-    const [usersLoading, setUsersLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true); // Single loading state for all sidebar data
     const { user } = useContext(AuthContext);
     const { onlineUsers, unreadCounts } = useContext(GlobalSocketContext);
 
-    const fetchUserChats = async () => {
-        try {
-            await axiosInstance.get('/api/chatrooms/get_or_create_general_room/');
-            const chatsResponse = await axiosInstance.get('/api/chatrooms/');
-            setChatList(chatsResponse.data);
-        } catch (error) {
-            console.error("Failed to fetch user's chats", error);
-        }
-    };
-
     useEffect(() => {
-        const fetchUsers = async () => {
+        const fetchSidebarData = async () => {
+            setIsLoading(true); // Start loading when we begin fetching
             try {
-                setUsersLoading(true);
-                const usersResponse = await axiosInstance.get('/api/users/');
+                // We run all our initial API calls in parallel for better performance
+                const [chatsResponse, usersResponse] = await Promise.all([
+                    axiosInstance.get('/api/chatrooms/'),
+                    axiosInstance.get('/api/users/')
+                ]);
+
+                const fetchedChats = chatsResponse.data;
+                const generalRoom = fetchedChats.find(room => room.name === "General");
+
+                // If the user isn't in the General room yet, join them and refetch the list
+                if (!generalRoom) {
+                    await axiosInstance.get('/api/chatrooms/get_or_create_general_room/');
+                    const finalChatsResponse = await axiosInstance.get('/api/chatrooms/');
+                    setChatList(finalChatsResponse.data);
+                } else {
+                    setChatList(fetchedChats);
+                }
+                
                 setUserList(usersResponse.data);
+
             } catch (error) {
-                console.error('Failed to fetch users', error);
+                console.error("Failed to fetch sidebar data", error);
             } finally {
-                setUsersLoading(false);
+                setIsLoading(false); // Finish loading, whether it succeeded or failed
             }
         };
+
+        // This is the key: only run the fetch function if the user object is available
         if (user) {
-            fetchUserChats();
-            fetchUsers();
+            fetchSidebarData();
         }
     }, [user]);
 
@@ -45,7 +54,11 @@ const Sidebar = ({ setActiveChat, activeChatId }) => {
                 target_user_id: targetUserId
             });
             const newChatRoom = response.data;
-            fetchUserChats();
+            
+            // Refetch the chat list to include the new private chat
+            const chatsResponse = await axiosInstance.get('/api/chatrooms/');
+            setChatList(chatsResponse.data);
+
             setActiveChat(newChatRoom);
         } catch (error) {
             console.error("Failed to start private chat", error);
@@ -63,30 +76,32 @@ const Sidebar = ({ setActiveChat, activeChatId }) => {
     return (
         <div className="sidebar">
             <h5 className="p-3">Chats</h5>
-            <ListGroup variant="flush">
-                {chatList.map(room => (
-                    <ListGroup.Item 
-                        key={room.id} 
-                        action 
-                        active={room.id === activeChatId}
-                        onClick={() => setActiveChat(room)}
-                        className="d-flex justify-content-between align-items-start"
-                    >
-                        {getChatName(room)}
-                        {unreadCounts[room.id] > 0 && (
-                            <Badge bg="primary" pill>
-                                {unreadCounts[room.id]}
-                            </Badge>
-                        )}
-                    </ListGroup.Item>
-                ))}
-            </ListGroup>
+            {isLoading ? (
+                <div className="text-center p-3"><Spinner animation="border" size="sm" /></div>
+            ) : (
+                <ListGroup variant="flush">
+                    {chatList.map(room => (
+                        <ListGroup.Item 
+                            key={room.id} 
+                            action 
+                            active={room.id === activeChatId}
+                            onClick={() => setActiveChat(room)}
+                            className="d-flex justify-content-between align-items-start"
+                        >
+                            {getChatName(room)}
+                            {unreadCounts[room.id] > 0 && (
+                                <Badge bg="primary" pill>
+                                    {unreadCounts[room.id]}
+                                </Badge>
+                            )}
+                        </ListGroup.Item>
+                    ))}
+                </ListGroup>
+            )}
             <hr/>
             <h5 className="p-3">Users</h5>
-            {usersLoading ? (
-                <div className="text-center p-3">
-                    <Spinner animation="border" size="sm" />
-                </div>
+            {isLoading ? (
+                <div className="text-center p-3"><Spinner animation="border" size="sm" /></div>
             ) : (
                 <ListGroup variant="flush">
                     {userList.map(u => (
@@ -102,7 +117,6 @@ const Sidebar = ({ setActiveChat, activeChatId }) => {
                                     width: '10px',
                                     height: '10px',
                                     backgroundColor: onlineUsers.has(u.id) ? '#28a745' : '#6c757d',
-                                    transition: 'background-color 0.3s ease',
                                 }}
                             ></span>
                             {u.username}
