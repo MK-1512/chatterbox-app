@@ -10,7 +10,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ.get('SECRET_KEY')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# --- Final ALLOWED_HOSTS for Deployment ---
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
@@ -43,7 +42,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# --- Final CORS Settings for Deployment ---
 CORS_ALLOWED_ORIGINS = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:3000,http://127.0.0.1:3000').split(',')
 
 ROOT_URLCONF = 'chat_project.urls'
@@ -67,7 +65,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'chat_project.wsgi.application'
 
-# --- Final DATABASES setting for both Local (MySQL) and Production (Postgres) ---
 DATABASES = {
     'default': dj_database_url.config(
         default=f"mysql://{os.environ.get('DATABASE_USER')}:{os.environ.get('DATABASE_PASSWORD')}@{os.environ.get('DATABASE_HOST')}:{os.environ.get('DATABASE_PORT')}/{os.environ.get('DATABASE_NAME')}",
@@ -75,9 +72,6 @@ DATABASES = {
     )
 }
 
-# --- This is the FINAL FIX for the EMOJI BUG ---
-# This code checks if the database is MySQL. If it is, it adds the
-# charset option. If it's PostgreSQL (on Render), it skips this, avoiding the crash.
 if DATABASES['default']['ENGINE'] == 'django.db.backends.mysql':
     DATABASES['default']['OPTIONS'] = {'charset': 'utf8mb4'}
 
@@ -110,7 +104,7 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "SIGNING_KEY": SECRET_KEY,
-    "ALGORITHM": "HS26",
+    "ALGORITHM": "HS256",  # <-- THIS IS THE FIX. It was "HS26".
     "USER_ID_FIELD": "id",
     "USER_ID_CLAIM": "user_id",
     "TOKEN_OBTAIN_SERIALIZER": "users.serializers.MyTokenObtainPairSerializer",
@@ -123,7 +117,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [REDIS_URL], # Use the REDIS_URL variable we defined
+            "hosts": [REDIS_URL],
         },
     },
 }
