@@ -31,15 +31,18 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if message_type == 'chat_message':
             message_content = data['message']
             new_message = await self.save_message(message_content)
+            
             message_payload = {
                 'id': new_message.id,
                 'author': {'username': self.user.username, 'avatar': self.user.avatar.url if self.user.avatar else None},
                 'content': new_message.content,
                 'timestamp': new_message.timestamp.isoformat(),
                 'room': new_message.room.id,
-                'read_by': [] # A new message has been read by no one yet
+                'read_by': []
             }
+            
             await self.channel_layer.group_send(self.room_group_name, {'type': 'chat.message', 'message': message_payload})
+            
             room = await self.get_room(new_message.room.id)
             participants = await self.get_room_participants(room)
             for participant in participants:
@@ -53,7 +56,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 self.room_group_name,
                 {'type': 'chat.typing', 'user': self.user.username, 'is_typing': data['is_typing']}
             )
-        # --- NEW: HANDLE READ RECEIPTS ---
+        
         elif message_type == 'read_receipt':
             message_id = data['message_id']
             await self.mark_message_as_read(message_id, self.user)
@@ -67,25 +70,24 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
 
     async def chat_message(self, event):
-        await self.send(text_data=json.dumps({'type': 'chat_message', 'message': event['message']}))
+        message = event['message']
+        await self.send(text_data=json.dumps({'type': 'chat_message', 'message': message}, ensure_ascii=False))
 
     async def chat_typing(self, event):
-        await self.send(text_data=json.dumps({'type': 'typing', 'user': event['user'], 'is_typing': event['is_typing']}))
+        await self.send(text_data=json.dumps({'type': 'typing', 'user': event['user'], 'is_typing': event['is_typing']}, ensure_ascii=False))
 
-    # --- NEW HANDLER FOR READ BROADCASTS ---
     async def message_read(self, event):
         await self.send(text_data=json.dumps({
             'type': 'message_read',
             'message_id': event['message_id'],
             'read_by_user': event['read_by_user']
-        }))
+        }, ensure_ascii=False))
 
     @database_sync_to_async
     def save_message(self, message_content):
         room = ChatRoom.objects.get(id=self.room_id)
         return Message.objects.create(room=room, author=self.user, content=message_content)
 
-    # --- NEW DATABASE METHOD ---
     @database_sync_to_async
     def mark_message_as_read(self, message_id, user):
         try:
@@ -93,7 +95,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             if user not in message.read_by.all():
                 message.read_by.add(user)
         except Message.DoesNotExist:
-            pass # Or handle error
+            pass
 
     @database_sync_to_async
     def get_room(self, room_id):
@@ -104,7 +106,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
         return list(room.participants.all())
 
 class NotificationConsumer(AsyncWebsocketConsumer):
-    # This entire class is unchanged from the last step
     async def connect(self):
         self.user = self.scope['user']
         if self.user.is_anonymous:
@@ -134,7 +135,9 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_discard(self.user_group_name, self.channel_name)
 
     async def send_notification(self, event):
-        await self.send(text_data=json.dumps({'type': 'notification', 'message': event['message']}))
+        # ADD ensure_ascii=False HERE AS WELL FOR SAFETY
+        await self.send(text_data=json.dumps({'type': 'notification', 'message': event['message']}, ensure_ascii=False))
 
     async def send_user_status(self, event):
-        await self.send(text_data=json.dumps({'type': 'user_status', 'user_id': event['user_id'], 'status': event['status']}))
+        # ADD ensure_ascii=False HERE AS WELL FOR SAFETY
+        await self.send(text_data=json.dumps({'type': 'user_status', 'user_id': event['user_id'], 'status': event['status']}, ensure_ascii=False))

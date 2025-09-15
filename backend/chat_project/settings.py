@@ -75,6 +75,8 @@ DATABASES = {
         conn_max_age=600
     )
 }
+DATABASES['default']['OPTIONS'] = {'charset': 'utf8mb4'}
+
 
 # DATABASES = {
 #     'default': {
