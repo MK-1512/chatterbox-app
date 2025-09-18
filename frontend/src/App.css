@@ -75,6 +75,9 @@ body {
     padding: 15px;
     border-top: 1px solid #ddd;
     background-color: #f8f9fa;
+    /* Use Flexbox for alignment */
+    display: flex;
+    align-items: center;
 }
 
 .typing-indicator {
@@ -84,17 +87,57 @@ body {
     color: #6c757d;
 }
 
-/* Fix for react-input-emoji library styles */
-.react-emoji-picker--container {
-    width: 100% !important;
+
+/* --- CSS Overrides for react-input-emoji --- */
+
+/* This wrapper will contain and control the library's component */
+.custom-input-emoji-wrapper {
+    flex-grow: 1;
+    display: flex;
+    position: relative;
+    border: 1px solid #ced4da;
+    border-radius: 20px;
+    background-color: white;
+    padding: 0 5px;
 }
+
+/* Main container of the library */
 .react-input-emoji--container {
-    width: 100% !important;
-    border-radius: 0 !important;
     border: none !important;
+    width: 100% !important;
+    background-color: transparent !important;
 }
+
+/* The wrapper around the text input area */
+.react-input-emoji--wrapper {
+    /* Reorder the input to appear after the button */
+    order: 2; 
+    padding-left: 5px !important;
+}
+
+/* The actual text input field */
 .react-input-emoji--input {
-    border-radius: 0 !important;
-    border: 1px solid #ced4da !important;
     height: 38px !important;
+}
+
+/* The emoji button */
+.react-input-emoji--button {
+    /* Reorder the button to appear first */
+    order: 1;
+    position: static !important; /* Override absolute positioning */
+    padding: 0 8px !important;
+    box-shadow: none !important;
+}
+
+/* The send button */
+.send-button-symbol {
+    flex-shrink: 0;
+    margin-left: 10px;
+    border-radius: 50% !important;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
 }
