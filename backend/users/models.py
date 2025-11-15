@@ -5,7 +5,7 @@ class CustomUser(AbstractUser):
     # We add the email field and ensure it must be unique.
     # AbstractUser has an email field, but it's not required to be unique by default.
     # This line overrides it to enforce uniqueness.
-    email = models.EmailField(blank=True, null=True, unique=True)
+    email = models.EmailField(blank=True, null=True, unique=False)
     
     # The avatar field is for our user profile picture feature.
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
