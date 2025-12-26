@@ -23,7 +23,6 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def start_private_chat(self, request):
-        # --- START OF DEBUGGING BLOCK ---
         print("\n" + "="*50)
         print("-----> STARTING 'start_private_chat' <-----")
         
@@ -54,8 +53,6 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
         else:
             print(f"DATABASE: Room '{room_name}' ALREADY EXISTS. Using existing room.")
 
-        # THE MOST IMPORTANT CHECK
-        # We will now read back from the database immediately to see who the participants are.
         room_from_db = ChatRoom.objects.get(id=room.id)
         participant_list = [p.username for p in room_from_db.participants.all()]
         print(f"FINAL CHECK: Participants in room '{room_from_db.name}' (ID: {room_from_db.id}) are: {participant_list}")
@@ -63,7 +60,6 @@ class ChatRoomViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(room_from_db)
         print("-----> FINISHED 'start_private_chat' <-----")
         print("="*50 + "\n")
-        # --- END OF DEBUGGING BLOCK ---
         return Response(serializer.data)
 
 class MessageViewSet(viewsets.ModelViewSet):

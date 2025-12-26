@@ -8,7 +8,7 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         username = os.environ.get('ADMIN_USER')
         password = os.environ.get('ADMIN_PASS')
-        email = os.environ.get('ADMIN_EMAIL', '') # Email is optional
+        email = os.environ.get('ADMIN_EMAIL', '')
 
         if not all([username, password]):
             self.stdout.write(self.style.ERROR('ADMIN_USER and ADMIN_PASS environment variables are required.'))

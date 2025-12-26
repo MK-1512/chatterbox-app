@@ -13,7 +13,6 @@ export const GlobalSocketProvider = ({ children }) => {
     useEffect(() => {
         if (!user || !authTokens) return;
 
-        // Fetch initial online users list
         const fetchOnlineUsers = async () => {
             try {
                 const response = await axiosInstance.get('/api/users/online/');
@@ -35,7 +34,6 @@ export const GlobalSocketProvider = ({ children }) => {
         socket.onmessage = (e) => {
             const data = JSON.parse(e.data);
 
-            // Handle User Status messages (for green dots)
             if (data.type === 'user_status') {
                 const userId = data.user_id;
                 const status = data.status;
@@ -49,7 +47,6 @@ export const GlobalSocketProvider = ({ children }) => {
                     return newOnlineUsers;
                 });
             }
-            // Handle Notification messages (for unread counts)
             if (data.type === 'notification' && data.message.type === 'new_message') {
                 const roomId = data.message.room_id;
                 setUnreadCounts(prev => ({ ...prev, [roomId]: (prev[roomId] || 0) + 1 }));

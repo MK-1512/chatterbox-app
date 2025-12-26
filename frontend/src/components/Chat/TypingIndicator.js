@@ -2,7 +2,6 @@ import React from 'react';
 
 const TypingIndicator = ({ users }) => {
     if (users.length === 0) {
-        // Return an empty div to maintain layout spacing
         return <div className="typing-indicator"></div>;
     }
 

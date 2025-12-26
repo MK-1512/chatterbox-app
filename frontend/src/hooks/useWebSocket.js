@@ -47,13 +47,10 @@ const useWebSocket = (roomId) => {
                     setTypingUsers(prev => prev.filter(u => u !== typingUser));
                 }
             }
-            // --- NEW: HANDLE MESSAGE READ EVENT ---
             else if (data.type === 'message_read') {
                 setMessages(prev => prev.map(msg => {
                     if (msg.id === data.message_id) {
-                        // Create a new reader object
                         const newReader = { username: data.read_by_user };
-                        // Add the new reader if they aren't already in the list
                         if (!msg.read_by.some(u => u.username === newReader.username)) {
                             return { ...msg, read_by: [...msg.read_by, newReader] };
                         }
@@ -77,7 +74,6 @@ const useWebSocket = (roomId) => {
         }
     };
     
-    // --- NEW: FUNCTION TO SEND READ RECEIPT ---
     const sendReadReceipt = (messageId) => {
         if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
             socketRef.current.send(JSON.stringify({

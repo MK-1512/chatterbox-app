@@ -10,7 +10,6 @@ class JwtAuthMiddleware(BaseMiddleware):
     async def __call__(self, scope, receive, send):
         close_old_connections()
 
-        # Get token from the query string
         query_string = scope.get("query_string", b"").decode("utf-8")
         query_params = parse_qs(query_string)
         token = query_params.get("token", [None])[0]
@@ -20,15 +19,11 @@ class JwtAuthMiddleware(BaseMiddleware):
             return await super().__call__(scope, receive, send)
 
         try:
-            # This will automatically validate the token's signature and expiration
             UntypedToken(token)
-            # You can add more validation here if you want
         except (InvalidToken, TokenError) as e:
-            # Token is invalid
             scope['user'] = AnonymousUser()
             return await super().__call__(scope, receive, send)
 
-        # If the token is valid, get the user
         from jwt import decode as jwt_decode
         from django.conf import settings
 

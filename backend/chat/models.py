@@ -15,7 +15,6 @@ class ChatRoom(models.Model):
 
 class Message(models.Model):
     room = models.ForeignKey(ChatRoom, on_delete=models.CASCADE, related_name='messages')
-    # THIS IS THE FIX: change related_name to something unique like 'authored_messages'
     author = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='authored_messages')
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)

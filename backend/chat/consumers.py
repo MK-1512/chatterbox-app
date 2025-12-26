@@ -135,9 +135,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             await self.channel_layer.group_discard(self.user_group_name, self.channel_name)
 
     async def send_notification(self, event):
-        # ADD ensure_ascii=False HERE AS WELL FOR SAFETY
         await self.send(text_data=json.dumps({'type': 'notification', 'message': event['message']}, ensure_ascii=False))
 
     async def send_user_status(self, event):
-        # ADD ensure_ascii=False HERE AS WELL FOR SAFETY
         await self.send(text_data=json.dumps({'type': 'user_status', 'user_id': event['user_id'], 'status': event['status']}, ensure_ascii=False))

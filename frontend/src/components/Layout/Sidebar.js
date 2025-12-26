@@ -7,15 +7,14 @@ import GlobalSocketContext from '../../contexts/GlobalSocketContext';
 const Sidebar = ({ setActiveChat, activeChatId }) => {
     const [chatList, setChatList] = useState([]);
     const [userList, setUserList] = useState([]);
-    const [isLoading, setIsLoading] = useState(true); // Single loading state for all sidebar data
+    const [isLoading, setIsLoading] = useState(true);
     const { user } = useContext(AuthContext);
     const { onlineUsers, unreadCounts } = useContext(GlobalSocketContext);
 
     useEffect(() => {
         const fetchSidebarData = async () => {
-            setIsLoading(true); // Start loading when we begin fetching
+            setIsLoading(true);
             try {
-                // We run all our initial API calls in parallel for better performance
                 const [chatsResponse, usersResponse] = await Promise.all([
                     axiosInstance.get('/api/chatrooms/'),
                     axiosInstance.get('/api/users/')
@@ -24,7 +23,6 @@ const Sidebar = ({ setActiveChat, activeChatId }) => {
                 const fetchedChats = chatsResponse.data;
                 const generalRoom = fetchedChats.find(room => room.name === "General");
 
-                // If the user isn't in the General room yet, join them and refetch the list
                 if (!generalRoom) {
                     await axiosInstance.get('/api/chatrooms/get_or_create_general_room/');
                     const finalChatsResponse = await axiosInstance.get('/api/chatrooms/');
@@ -38,11 +36,10 @@ const Sidebar = ({ setActiveChat, activeChatId }) => {
             } catch (error) {
                 console.error("Failed to fetch sidebar data", error);
             } finally {
-                setIsLoading(false); // Finish loading, whether it succeeded or failed
+                setIsLoading(false);
             }
         };
 
-        // This is the key: only run the fetch function if the user object is available
         if (user) {
             fetchSidebarData();
         }
@@ -55,7 +52,6 @@ const Sidebar = ({ setActiveChat, activeChatId }) => {
             });
             const newChatRoom = response.data;
             
-            // Refetch the chat list to include the new private chat
             const chatsResponse = await axiosInstance.get('/api/chatrooms/');
             setChatList(chatsResponse.data);
 

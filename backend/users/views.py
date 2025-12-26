@@ -22,7 +22,6 @@ class OnlineUsersView(generics.ListAPIView):
 
     def get_queryset(self):
         try:
-            # Note: This is a synchronous redis call, so we import the standard library
             import redis
             r = redis.Redis.from_url(settings.REDIS_URL, decode_responses=True)
             online_user_ids = r.smembers('online_users')

@@ -14,7 +14,6 @@ export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(() =>
         localStorage.getItem('authTokens') ? jwtDecode(JSON.parse(localStorage.getItem('authTokens')).access) : null
     );
-    // This new state will solve our race condition
     const [loading, setLoading] = useState(true);
 
     const navigate = useNavigate();
@@ -65,7 +64,6 @@ export const AuthProvider = ({ children }) => {
     };
 
     useEffect(() => {
-        // This effect runs once on startup to finish the loading process
         if (loading) {
             setLoading(false);
         }
@@ -73,7 +71,7 @@ export const AuthProvider = ({ children }) => {
 
     return (
         <AuthContext.Provider value={contextData}>
-            {/* We will not render the rest of the app until the auth check is complete */}
+            {}
             {loading ? null : children}
         </AuthContext.Provider>
     );

@@ -5,7 +5,7 @@ body {
 
 .chat-page {
     display: flex;
-    height: calc(100vh - 56px); /* Full height minus navbar */
+    height: calc(100vh - 56px);
 }
 
 .sidebar {
@@ -75,7 +75,6 @@ body {
     padding: 15px;
     border-top: 1px solid #ddd;
     background-color: #f8f9fa;
-    /* Use Flexbox for alignment */
     display: flex;
     align-items: center;
 }
@@ -88,9 +87,7 @@ body {
 }
 
 
-/* --- CSS Overrides for react-input-emoji --- */
 
-/* This wrapper will contain and control the library's component */
 .custom-input-emoji-wrapper {
     flex-grow: 1;
     display: flex;
@@ -101,35 +98,28 @@ body {
     padding: 0 5px;
 }
 
-/* Main container of the library */
 .react-input-emoji--container {
     border: none !important;
     width: 100% !important;
     background-color: transparent !important;
 }
 
-/* The wrapper around the text input area */
 .react-input-emoji--wrapper {
-    /* Reorder the input to appear after the button */
     order: 2; 
     padding-left: 5px !important;
 }
 
-/* The actual text input field */
 .react-input-emoji--input {
     height: 38px !important;
 }
 
-/* The emoji button */
 .react-input-emoji--button {
-    /* Reorder the button to appear first */
     order: 1;
-    position: static !important; /* Override absolute positioning */
+    position: static !important;
     padding: 0 8px !important;
     box-shadow: none !important;
 }
 
-/* The send button */
 .send-button-symbol {
     flex-shrink: 0;
     margin-left: 10px;
